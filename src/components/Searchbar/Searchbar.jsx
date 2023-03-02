@@ -18,16 +18,19 @@ export class Searchbar extends Component {
     });
   }
 
+  onSubmit = e => {
+    e.preventDefault();
+
+    if (this.state.inputValue.trim()) {
+      this.props.onFormSubmit(this.state.inputValue.trim());
+      this.clearInput();
+    }
+  };
+
   render() {
     return (
       <header className="Searchbar">
-        <form
-          className="SearchForm"
-          onSubmit={e => {
-            this.props.onFormSubmit(e, this.state.inputValue.trim());
-            this.clearInput();
-          }}
-        >
+        <form className="SearchForm" onSubmit={this.onSubmit}>
           <button className="SearchForm-button" type="submit">
             <span>
               <FaSearch />

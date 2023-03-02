@@ -4,42 +4,51 @@ import { Button } from './ImageGallery/Button/Button';
 import { Component } from 'react';
 import { fetchImages } from 'api/fetchImages';
 import { Modal } from './Modal/Modal';
+import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
-    searchQuery: '',
-    page: 1,
     images: [],
-    isOpen: false,
+    searchQuery: '',
     largeImage: '',
+    totalHits: 0,
+    page: 1,
+    isLoad: false,
+    isOpen: false,
   };
 
   async componentDidUpdate(prevProps, prevState) {
     const { searchQuery, page } = this.state;
 
+    if (prevState.searchQuery !== this.state.searchQuery) {
+      this.showIsLoad();
+      const data = await fetchImages(searchQuery);
+
+      this.setState({
+        images: data.hits,
+        totalHits: data.totalHits,
+        isLoad: false,
+      });
+    }
+
     if (prevState.page !== this.state.page && this.state.page !== 1) {
       const data = await fetchImages(searchQuery, page);
 
       this.setState(prevState => {
-        return { images: [...prevState.images, ...data] };
+        return { images: [...prevState.images, ...data.hits], isLoad: false };
       });
     }
   }
 
-  onFormSubmit = async (e, inputValue) => {
-    e.preventDefault();
-    if (inputValue) {
-      this.setState({
-        searchQuery: inputValue,
-        page: 1,
-      });
+  showIsLoad() {
+    this.setState({ isLoad: true });
+  }
 
-      const data = await fetchImages(inputValue);
-
-      this.setState({
-        images: data,
-      });
-    }
+  onFormSubmit = async inputValue => {
+    this.setState({
+      searchQuery: inputValue,
+      page: 1,
+    });
   };
 
   onLoadMoreButtonClick = () => {
@@ -57,15 +66,21 @@ export class App extends Component {
   };
 
   render() {
-    const { images, isOpen } = this.state;
+    const { images, isOpen, totalHits, page, isLoad } = this.state;
     return (
       <>
         <Searchbar onFormSubmit={this.onFormSubmit} />
-        {images.length > 1 && (
-          <>
-            <ImageGallery images={images} toggleModal={this.toggleModal} />
-            <Button onLoadMoreButtonClick={this.onLoadMoreButtonClick} />
-          </>
+        {isLoad ? (
+          <Loader />
+        ) : (
+          images.length > 1 && (
+            <>
+              <ImageGallery images={images} toggleModal={this.toggleModal} />
+              {totalHits >= page * 12 && (
+                <Button onLoadMoreButtonClick={this.onLoadMoreButtonClick} />
+              )}
+            </>
+          )
         )}
         {isOpen && (
           <Modal

@@ -1,3 +1,4 @@
+import { PropTypes } from 'prop-types';
 import { Component } from 'react';
 
 export class Button extends Component {
@@ -11,3 +12,7 @@ export class Button extends Component {
     );
   }
 }
+
+Button.propTypes = {
+  onLoadMoreButtonClick: PropTypes.func.isRequired,
+};

@@ -1,8 +1,7 @@
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 
 export class ImageGalleryItem extends Component {
-  state = {};
-
   render() {
     const { smallImage, modalImage, toggleModal } = this.props;
 
@@ -23,3 +22,9 @@ export class ImageGalleryItem extends Component {
     );
   }
 }
+
+ImageGalleryItem.propTypes = {
+  modalImage: PropTypes.string,
+  smallImage: PropTypes.string,
+  toggleModal: PropTypes.func.isRequired,
+};

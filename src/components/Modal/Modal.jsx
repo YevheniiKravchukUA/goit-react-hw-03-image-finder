@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { Component } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -38,3 +39,8 @@ export class Modal extends Component {
     );
   }
 }
+
+Modal.propTypes = {
+  largeImage: PropTypes.string,
+  toggleModal: PropTypes.func.isRequired,
+};
