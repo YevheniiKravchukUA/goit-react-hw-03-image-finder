@@ -20,23 +20,24 @@ export class App extends Component {
   async componentDidUpdate(prevProps, prevState) {
     const { searchQuery, page } = this.state;
 
-    if (prevState.searchQuery !== this.state.searchQuery) {
-      this.showIsLoad();
-      const data = await fetchImages(searchQuery);
+    if (
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.page !== this.state.page
+    ) {
+      try {
+        this.showIsLoad();
+        const data = await fetchImages(searchQuery, page);
 
-      this.setState({
-        images: data.hits,
-        totalHits: data.totalHits,
-        isLoad: false,
-      });
-    }
-
-    if (prevState.page !== this.state.page && this.state.page !== 1) {
-      const data = await fetchImages(searchQuery, page);
-
-      this.setState(prevState => {
-        return { images: [...prevState.images, ...data.hits], isLoad: false };
-      });
+        this.setState(prevState => {
+          return {
+            images: [...prevState.images, ...data.hits],
+            totalHits: data.totalHits,
+            isLoad: false,
+          };
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
@@ -44,8 +45,9 @@ export class App extends Component {
     this.setState({ isLoad: true });
   }
 
-  onFormSubmit = async inputValue => {
+  onFormSubmit = inputValue => {
     this.setState({
+      images: [],
       searchQuery: inputValue,
       page: 1,
     });
@@ -70,17 +72,18 @@ export class App extends Component {
     return (
       <>
         <Searchbar onFormSubmit={this.onFormSubmit} />
-        {isLoad ? (
-          <Loader />
-        ) : (
-          images.length > 1 && (
-            <>
-              <ImageGallery images={images} toggleModal={this.toggleModal} />
-              {totalHits >= page * 12 && (
+        {images.length > 1 && (
+          <>
+            <ImageGallery images={images} toggleModal={this.toggleModal} />
+            {console.log(totalHits)}
+            {isLoad ? (
+              <Loader />
+            ) : (
+              totalHits >= page * 12 && (
                 <Button onLoadMoreButtonClick={this.onLoadMoreButtonClick} />
-              )}
-            </>
-          )
+              )
+            )}
+          </>
         )}
         {isOpen && (
           <Modal
